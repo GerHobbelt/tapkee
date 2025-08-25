@@ -62,7 +62,7 @@ struct TypePolicyBase
     }
     virtual void copyFromValue(void const*, void**) const = 0;
     virtual void* getValue(void**) const = 0;
-    virtual void free(void**) const = 0;
+    virtual void release(void**) const = 0;
     virtual void clone(void* const*, void**) const = 0;
     virtual void move(void* const*, void**) const = 0;
     virtual std::string repr(void**) const = 0;
@@ -83,7 +83,7 @@ template <typename T> struct PointerTypePolicyImpl : public TypePolicyBase
     {
         return *src;
     }
-    inline virtual void free(void** src) const
+    inline virtual void release(void** src) const
     {
         if (*src)
             delete (*reinterpret_cast<T**>(src));

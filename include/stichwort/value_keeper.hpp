@@ -54,7 +54,7 @@ class ValueKeeper
 
     ~ValueKeeper()
     {
-        policy->free(&value_ptr);
+        policy->release(&value_ptr);
     }
 
     ValueKeeper(const ValueKeeper& v) : policy(v.policy), value_ptr(NULL)
@@ -64,7 +64,7 @@ class ValueKeeper
 
     ValueKeeper& operator=(const ValueKeeper& v)
     {
-        policy->free(&value_ptr);
+        policy->release(&value_ptr);
         policy = v.policy;
         policy->clone(&(v.value_ptr), &value_ptr);
         return *this;
