@@ -473,7 +473,7 @@ int run(int argc, const char **argv)
                 tapkee::diffusion_map_timesteps = timesteps,
                 tapkee::gaussian_kernel_width = width,
                 tapkee::max_iteration = opt[MAX_ITERS_KEYWORD].as<int>(),
-                tapkee::spe_global_strategy = opt.count(SPE_LOCAL_KEYWORD),
+                tapkee::spe_global_strategy = (opt.count(SPE_LOCAL_KEYWORD) > 0),
                 tapkee::spe_num_updates = opt[SPE_NUM_UPDATES_KEYWORD].as<int>(),
                 tapkee::spe_tolerance = opt[SPE_TOLERANCE_KEYWORD].as<double>(),
                 tapkee::landmark_ratio = opt[LANDMARK_RATIO_KEYWORD].as<double>(),
