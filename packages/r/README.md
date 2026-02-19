@@ -3,33 +3,61 @@
 Efficient dimensionality reduction library with a focus on spectral methods.
 
 Tapkee implements over 20 dimensionality reduction algorithms and provides
-a simple Python interface to all of them.
+a simple R interface to all of them.
 
 ## Installation
 
+### Prerequisites
+
+The `fmt` C++ library headers must be installed:
+
 ```bash
-pip install tapkee
+# macOS
+brew install fmt
+
+# Ubuntu/Debian
+sudo apt-get install libfmt-dev
+
+# Fedora
+sudo dnf install fmt-devel
+```
+
+Optionally, install ARPACK for faster eigendecomposition on large datasets:
+
+```bash
+# macOS
+brew install arpack
+
+# Ubuntu/Debian
+sudo apt-get install libarpack2-dev
+```
+
+### Install from source
+
+```r
+# install.packages("remotes")
+remotes::install_github("lisitsyn/tapkee", subdir = "packages/r")
 ```
 
 ## Usage
 
-```python
-import numpy as np
-from matplotlib import pyplot as plt
-import tapkee
+```r
+library(tapkee)
 
 # Generate a Swiss roll dataset
-n = 2000
-t = 1.5 * np.pi * (1 + 2 * np.random.rand(n))
-x, y, z = t * np.cos(t), 30 * np.random.rand(n), t * np.sin(t)
-data = np.vstack([x, y, z])  # 3 features, n samples
+set.seed(42)
+n <- 2000
+t <- 1.5 * pi * (1 + 2 * runif(n))
+x <- t * cos(t)
+y <- 30 * runif(n)
+z <- t * sin(t)
+data <- rbind(x, y, z)  # 3 features, n samples
 
 # Unroll with Locally Linear Embedding
-embedding = tapkee.embed(data, method="lle", num_neighbors=12)
+embedding <- tapkee_embed(data, method = "lle", num_neighbors = 12L)
 
-plt.scatter(embedding[:, 0], embedding[:, 1], c=t, cmap="Spectral", s=5)
-plt.title("Swiss roll unrolled with LLE")
-plt.show()
+plot(embedding[, 1], embedding[, 2], col = rainbow(n)[rank(t)],
+     pch = 20, cex = 0.5, main = "Swiss roll unrolled with LLE")
 ```
 
 ## Supported methods
@@ -49,7 +77,7 @@ plt.show()
 | PCA | `"pca"` | |
 | Kernel PCA | `"kpca"` | `gaussian_kernel_width` |
 | Factor Analysis | `"fa"` | `max_iteration`, `fa_epsilon` |
-| Random Projection | `"ra"` | |
+| Random Projection | `"random_projection"` | |
 | MDS | `"mds"` | |
 | Landmark MDS | `"l-mds"` | `landmark_ratio` |
 | t-SNE | `"t-sne"` | `sne_perplexity`, `sne_theta` |
@@ -57,27 +85,6 @@ plt.show()
 | Manifold Sculpting | `"manifold_sculpting"` | `num_neighbors`, `squishing_rate`, `max_iteration` |
 
 All methods accept `target_dimension` (default: 2). Neighbor-based methods accept `num_neighbors` (default: 5).
-
-## Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `target_dimension` | int | Output dimensionality |
-| `num_neighbors` | int | Number of neighbors for local methods |
-| `gaussian_kernel_width` | float | Width of the Gaussian kernel |
-| `landmark_ratio` | float | Ratio of landmark points (0 to 1) |
-| `max_iteration` | int | Maximum iterations for iterative methods |
-| `diffusion_map_timesteps` | int | Number of timesteps for Diffusion Maps |
-| `sne_perplexity` | float | Perplexity for t-SNE |
-| `sne_theta` | float | Angle for Barnes-Hut approximation in t-SNE |
-| `squishing_rate` | float | Rate for Manifold Sculpting |
-| `spe_global_strategy` | bool | Use global strategy for SPE |
-| `spe_num_updates` | int | Number of SPE updates |
-| `spe_tolerance` | float | SPE convergence tolerance |
-| `nullspace_shift` | float | Regularizer for eigenproblems |
-| `klle_shift` | float | KLLE regularizer |
-| `fa_epsilon` | float | Factor Analysis convergence epsilon |
-| `check_connectivity` | bool | Check graph connectivity |
 
 ## Links
 

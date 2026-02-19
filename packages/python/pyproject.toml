@@ -4,8 +4,8 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "tapkee"
-version = "1.3"
-description = "C++ library for dimensionality reduction"
+version = "1.3.4"
+description = "Dimensionality reduction library with Isomap, LLE, t-SNE, PCA, and more"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "BSD-3-Clause"
@@ -14,6 +14,15 @@ authors = [
     { name = "Fernando José", email = "fernando.iglesiasg@gmail.com" },
 ]
 dependencies = ["numpy"]
+keywords = [
+    "dimensionality-reduction", "manifold-learning",
+    "isomap", "lle", "locally-linear-embedding",
+    "t-sne", "pca", "kernel-pca",
+    "mds", "multidimensional-scaling",
+    "diffusion-map", "laplacian-eigenmaps",
+    "factor-analysis", "random-projection",
+    "manifold-sculpting",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
@@ -28,20 +37,20 @@ Repository = "https://github.com/lisitsyn/tapkee"
 Issues = "https://github.com/lisitsyn/tapkee/issues"
 
 [tool.scikit-build]
-cmake.source-dir = "../.."
+cmake.source-dir = "."
 cmake.args = ["-DBUILD_NANOBIND=ON", "-DBUILD_CLI=OFF"]
 wheel.packages = []
 wheel.install-dir = "."
 install.components = ["python"]
 
 [tool.cibuildwheel]
-skip = ["pp*", "*-musllinux*", "*-win32", "*_i686", "cp*t-*"]
+build = ["cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+skip = ["*-musllinux*", "*-win32", "*_i686", "cp*t-*"]
 test-requires = ["numpy"]
 test-command = '''python -c "import tapkee; import numpy as np; r = tapkee.embed(np.random.randn(3, 50), method='pca'); assert r.shape == (50, 2)"'''
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "manylinux_2_28"
-manylinux-aarch64-image = "manylinux_2_28"
 before-all = [
     "dnf install -y epel-release",
     "dnf install -y arpack-devel cmake",

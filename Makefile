@@ -1,4 +1,10 @@
 PYTHON ?= python
+R ?= R
+RSCRIPT ?= Rscript
+VENV_BUILD = .venv-build
+VENV_TEST = .venv-test
+SMOKE_TEST = import tapkee; import numpy as np; r = tapkee.embed(np.random.randn(3, 50), method='pca'); assert r.shape == (50, 2); print('OK')
+R_SMOKE_TEST = library(tapkee); X <- matrix(rnorm(300), 3, 100); r <- tapkee_embed(X, method='pca'); stopifnot(dim(r) == c(100, 2)); cat('OK\n')
 plotter := $(PYTHON) -c 'from pylab import*;X=loadtxt(sys.stdin);scatter(X[0],X[1]);title("Embedding");grid();show()'
 
 default:
@@ -88,13 +94,43 @@ faces: default
 format: default
 	@(find . -iname *.hpp -o -iname *.cpp -iname *.h | xargs clang-format -i)
 
+$(VENV_BUILD):
+	$(PYTHON) -m venv $(VENV_BUILD)
+	$(VENV_BUILD)/bin/pip install -q build
+
+$(VENV_TEST):
+	$(PYTHON) -m venv $(VENV_TEST)
+
 pip-package:
 	$(PYTHON) -m pip wheel packages/python -w dist
 
-test-pip-package: pip-package
-	$(PYTHON) -m venv .venv-test
-	.venv-test/bin/python -m pip install --no-index --find-links dist tapkee
-	.venv-test/bin/python -c "import tapkee; import numpy as np; r = tapkee.embed(np.random.randn(3, 50), method='pca'); assert r.shape == (50, 2); print('OK')"
-	rm -rf .venv-test
+pip-sdist: $(VENV_BUILD)
+	rm -rf .sdist-work dist/tapkee-*.tar.gz
+	cp -rL packages/python .sdist-work
+	cd .sdist-work && ../$(VENV_BUILD)/bin/python -m build --sdist -o ../dist
+	rm -rf .sdist-work
 
-.PHONY: test minimal rna precomputed promoters mnist faces pip-package test-pip-package
+test-pip-package: pip-package $(VENV_TEST)
+	$(VENV_TEST)/bin/pip install --force-reinstall --no-index --find-links dist tapkee
+	$(VENV_TEST)/bin/python -c "$(SMOKE_TEST)"
+
+test-pip-sdist: pip-sdist $(VENV_TEST)
+	$(VENV_TEST)/bin/pip install --force-reinstall dist/tapkee-*.tar.gz
+	$(VENV_TEST)/bin/python -c "$(SMOKE_TEST)"
+
+clean-venvs:
+	rm -rf $(VENV_BUILD) $(VENV_TEST)
+
+r-package:
+	$(R) CMD build packages/r
+
+r-check: r-package
+	$(R) CMD check --as-cran tapkee_*.tar.gz
+
+r-install:
+	$(R) CMD INSTALL packages/r
+
+test-r-package: r-install
+	$(RSCRIPT) -e "$(R_SMOKE_TEST)"
+
+.PHONY: test minimal rna precomputed promoters mnist faces pip-package test-pip-package pip-sdist test-pip-sdist clean-venvs r-package r-check r-install test-r-package
