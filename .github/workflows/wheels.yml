@@ -12,7 +12,7 @@ jobs:
     name: Test pip package
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Install system dependencies
       run: sudo apt-get update && sudo apt-get install -y libarpack2-dev libeigen3-dev libfmt-dev
@@ -24,7 +24,7 @@ jobs:
     name: Build sdist
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Build sdist
       run: |
@@ -50,13 +50,13 @@ jobs:
           - name: macOS
             os: macos-latest
             arch: arm64
-            macos_target: "15.0"
+            macos_target: "26.0"
           - name: Windows
             os: windows-latest
             arch: AMD64
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Set up vcpkg cache
       if: runner.os == 'Windows'
@@ -66,7 +66,7 @@ jobs:
         key: vcpkg-${{ matrix.arch }}-${{ hashFiles('packages/python/pyproject.toml') }}
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v3.3
+      uses: pypa/cibuildwheel@v4.1
       with:
         package-dir: packages/python
       env:
